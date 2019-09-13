@@ -14,37 +14,39 @@ const Login = ({ navigation }) => {
   const biometrics = async () => {
     const os = Platform.OS;
     const deviceName = Constants.deviceName;
+    let result;
+
     let enrolled = await LocalAuthentication.isEnrolledAsync();
-    if (enrolled) {
-      let result;
-      if (os === "ios" && deviceName === "iPhone X") {
-        result = await LocalAuthentication.authenticateAsync({
-          promptMessage: "Hold phone still."
-        });
-        if (result.success) {
-          navigation.navigate("Home");
-        } else {
-          alert("Face Recognition Auth Failed.");
-        }
-      }
-      result = await LocalAuthentication.authenticateAsync({});
-      if (result.success) {
-        navigation.navigate("Home");
-      } else {
-        alert("FingerPrint Auth Failed.");
-      }
-    } else {
+    if (!enrolled) {
       alert("Biometrics are not yet set up on your device.");
     }
+
+    if (os === "ios" && deviceName === "iPhone X") {
+      result = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Hold phone still."
+      });
+      result.success
+        ? navigation.navigate("Home")
+        : alert("Face Recognition Auth Failed");
+    }
+
+    alert("Scan your finger now");
+    result = await LocalAuthentication.authenticateAsync({});
+    result.success
+      ? navigation.navigate("Home")
+      : alert("FingerPrint Auth Failed");
   };
 
   const authInformation = async () => {
     let compatible = await LocalAuthentication.hasHardwareAsync();
     console.log("compatible", compatible);
+
     let kindsOfAuth = await LocalAuthentication.supportedAuthenticationTypesAsync();
     console.log("kinds of auth", kindsOfAuth);
+
     let isEnrolled = await LocalAuthentication.isEnrolledAsync();
     console.log("enrolled", isEnrolled);
+
     let authenticate = LocalAuthentication.authenticateAsync();
     console.log("authenticate", authenticate);
     console.log("device name", Constants.deviceName);
